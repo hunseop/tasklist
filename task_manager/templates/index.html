@@ -9,43 +9,33 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-css/dist/loading.min.css">
     <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
-    <style>
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 </head>
 <body class="bg-dark text-light d-flex flex-column min-vh-100">
     <div class="container mt-5 flex-grow-1">
         <h1 class="text-center mb-4">FPAT</h1>
         <p class="text-center text-muted mb-5">Firewall Policy Analysis Tool</p>
 
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" id="ip-input" placeholder="IP" aria-label="IP">
-            <input type="text" class="form-control" id="id-input" placeholder="ID" aria-label="ID">
-            <input type="password" class="form-control" id="pw-input" placeholder="PW" aria-label="PW">
-            <select class="form-select" id="firewall-select">
-                <option selected>Select Firewall</option>
-                <option value="Paloalto">Paloalto</option>
-                <option value="MF2">MF2</option>
-                <option value="NGF">NGF</option>
-            </select>
-            <select class="form-select" id="command-select">
-                <option selected>Select Command</option>
-                <option value="command1">Command 1</option>
-                <option value="command2">Command 2</option>
-                <option value="command3">Command 3</option>
-            </select>
-            <button class="btn btn-primary" type="button" id="run-button">RUN</button>
+        <div class="card bg-secondary mb-4 shadow">
+            <div class="card-body">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="ip-input" placeholder="Host" aria-label="IP">
+                    <input type="text" class="form-control" id="id-input" placeholder="Username / Secret ID" aria-label="ID">
+                    <input type="password" class="form-control" id="pw-input" placeholder="Password / Secret Key" aria-label="PW">
+                    <select class="form-select" id="firewall-select">
+                        <option selected>Select Firewall Type</option>
+                        <option value="Paloalto">Paloalto</option>
+                        <option value="MF2">MF2</option>
+                        <option value="NGF">NGF</option>
+                    </select>
+                    <select class="form-select" id="command-select">
+                        <option selected>Select Command</option>
+                        <option value="command1">Command 1</option>
+                        <option value="command2">Command 2</option>
+                        <option value="command3">Command 3</option>
+                    </select>
+                    <button class="btn btn-primary" type="button" id="run-button">Run</button>
+                </div>
+            </div>
         </div>
 
         <div id="task-list" class="mb-4">
