@@ -3,19 +3,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const runButton = document.getElementById('run-button');
 
     runButton.addEventListener('click', function() {
-        const ip = document.getElementById('ip-input').value;
+        const ipInput = document.getElementById('ip-input').value;
         const id = document.getElementById('id-input').value;
         const pw = document.getElementById('pw-input').value;
         const firewall = document.getElementById('firewall-select').value;
         const command = document.getElementById('command-select').value;
 
-        if (!ip || !id || !pw || firewall === 'Select Firewall' || command === 'Select Command') {
+        if (!ipInput || !id || !pw || firewall === 'Select Firewall Type' || command === 'Select Command') {
             alert('모든 필드를 입력해주세요.');
             return;
         }
 
-        const taskItem = createTaskItem(ip, id, pw, firewall, command);
-        taskList.insertBefore(taskItem, taskList.firstChild);
+        const ipList = ipInput.split(',').map(ip => ip.trim());
+        const validIPs = ipList.filter(ip => isValidIP(ip));
+
+        if (validIPs.length === 0) {
+            alert('유효한 IP 주소를 입력해주세요.');
+            return;
+        }
+
+        validIPs.forEach(ip => {
+            const taskItem = createTaskItem(ip, id, pw, firewall, command);
+            taskList.insertBefore(taskItem, taskList.firstChild);
+            executeTask(taskItem, ip, id, pw, firewall, command);
+        });
 
         // 입력 필드 초기화
         document.getElementById('ip-input').value = '';
@@ -23,10 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('pw-input').value = '';
         document.getElementById('firewall-select').selectedIndex = 0;
         document.getElementById('command-select').selectedIndex = 0;
-
-        // 태스크 실행
-        executeTask(taskItem, ip, id, pw, firewall, command);
     });
+
+    function isValidIP(ip) {
+        const ipRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        return ipRegex.test(ip);
+    }
 
     function createTaskItem(ip, id, pw, firewall, command) {
         const taskItem = document.createElement('div');
@@ -98,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             downloadBtn.onclick = () => {
-                downloadExcel(data, ip, firewall, command);
+                downloadExcel(JSON.parse(taskItem.dataset.result), ip, firewall, command);
             };
         })
         .catch(error => {
