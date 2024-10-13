@@ -158,9 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     width: '300px'
                 }
             ],
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Korean.json'
-            },
             drawCallback: function() {
                 // DataTables 초기화 완료 후 스피너 제거
                 resultDiv.querySelector('.spinner-container').style.display = 'none';
