@@ -58,7 +58,3 @@ async def process_data(
 
     print(f"Processing data for IP: {ip}, Firewall: {firewall}, Command: {command}")
     return data
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

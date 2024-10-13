@@ -179,14 +179,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function downloadExcel(data, ip, firewall, command) {
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Results");
+        // 현재 날짜를 YYYYMMDD 형식으로 가져오기
+        const today = new Date();
+        const date = today.getFullYear().toString() +
+                    (today.getMonth() + 1).toString().padStart(2, '0') +
+                    today.getDate().toString().padStart(2, '0');
 
         // 파일 이름 생성
-        const fileName = `${ip}_${firewall}_${command}_results.xlsx`;
+        const fileName = `${date}_${ip}_${command}.xlsx`;
 
-        // 엑셀 파일 다운로드
-        XLSX.writeFile(wb, fileName);
+        // 워크북 생성
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(data);
+
+        // 워크시트를 워크북에 추가
+        XLSX.utils.book_append_sheet(wb, ws, "Results");
+        
+        // 엑셀 파일을 Blob으로 생성
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/octet-stream' });
+
+        // FileSaver.js를 사용하여 파일 저장 대화상자 표시
+        saveAs(blob, fileName);
     }
 });
