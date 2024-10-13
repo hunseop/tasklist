@@ -19,12 +19,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 현재 디렉토리 경로 가져오기
 current_dir = os.path.dirname(os.path.realpath(__file__))
-static_dir = os.path.join(current_dir, "static")
-templates_dir = os.path.join(current_dir, "templates")
 
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
-templates = Jinja2Templates(directory=templates_dir)
+# static 파일과 템플릿 디렉토리 설정
+app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
 @app.get("/")
 async def read_root(request: Request):
