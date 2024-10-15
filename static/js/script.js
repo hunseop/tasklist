@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const taskList = document.getElementById('task-list');
     const runButton = document.getElementById('run-button');
+    let runningTasks = 0;
+    const maxTasks = 3;
+    const taskQueue = [];
 
     runButton.addEventListener('click', function() {
         const ipInput = document.getElementById('ip-input').value;
@@ -25,7 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
         validIPs.forEach(ip => {
             const taskItem = createTaskItem(ip, id, pw, firewall, command);
             taskList.insertBefore(taskItem, taskList.firstChild);
-            executeTask(taskItem, ip, id, pw, firewall, command);
+            if (runningTasks < maxTasks) {
+                runningTasks++;
+                executeTask(taskItem, ip, id, pw, firewall, command);
+            } else {
+                taskQueue.push(() => executeTask(taskItem, ip, id, pw, firewall, command));
+            }
         });
 
         // 입력 필드 초기화
@@ -56,25 +64,25 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="task-result mt-2" style="display: none;"></div>
         `;
-
+    
         taskItem.querySelector('.delete-btn').addEventListener('click', function() {
             taskItem.remove();
         });
-
+    
         return taskItem;
     }
-
+    
     function executeTask(taskItem, ip, id, pw, firewall, command) {
         const spinner = taskItem.querySelector('.spinner');
         const viewBtn = taskItem.querySelector('.view-btn');
         const downloadBtn = taskItem.querySelector('.download-btn');
         const resultDiv = taskItem.querySelector('.task-result');
-
+    
         // 스피너 표시
         spinner.style.display = 'inline-block';
         viewBtn.style.display = 'none';
         downloadBtn.style.display = 'none';
-
+    
         // FormData 생성
         const formData = new FormData();
         formData.append('ip', ip);
@@ -82,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('pw', pw);
         formData.append('firewall', firewall);
         formData.append('command', command);
-
+    
         // API 호출
         fetch('/process_data', {
             method: 'POST',
@@ -97,19 +105,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             // 데이터 처리 완료
             taskItem.dataset.result = JSON.stringify(data);
-
+    
             // UI 업데이트
             spinner.style.display = 'none';
             viewBtn.style.display = 'inline-block';
             downloadBtn.style.display = 'inline-block';
-
+    
             viewBtn.onclick = () => {
                 resultDiv.style.display = resultDiv.style.display === 'none' ? 'block' : 'none';
                 if (resultDiv.style.display === 'block') {
                     showResult(resultDiv, JSON.parse(taskItem.dataset.result));
                 }
             };
-
+    
             downloadBtn.onclick = () => {
                 downloadExcel(JSON.parse(taskItem.dataset.result), ip, firewall, command);
             };
@@ -117,13 +125,21 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             spinner.style.display = 'none';
-            resultDiv.innerHTML = '<p class="text-danger">데이터를 불러오는 데 실패했습니다.</p>';
+            resultDiv.innerHTML = '<p class="text-danger">Failed to load data.</p>';
+        })
+        .finally(() => {
+            runningTasks--;
+            if (taskQueue.length > 0) {
+                const nextTask = taskQueue.shift();
+                runningTasks++;
+                nextTask();
+            }
         });
     }
-
+    
     function showResult(resultDiv, data) {
         if (!data || !Array.isArray(data) || data.length === 0) {
-            resultDiv.innerHTML = '<p class="text-warning">표시할 데이터가 없습니다.</p>';
+            resultDiv.innerHTML = '<p class="text-warning">There is no data to display.</p>';
             return;
         }
 
