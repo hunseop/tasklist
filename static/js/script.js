@@ -176,7 +176,7 @@ const commandSelect = document.getElementById('command-select');
     }
     
     function showResult(resultDiv, data) {
-        if (!data || !Array.isArray(data) || data.length === 0) {
+        if (!data || !data.data || data.data.length === 0) {
             resultDiv.innerHTML = '<p class="text-warning">There is no data to display.</p>';
             return;
         }
@@ -188,16 +188,16 @@ const commandSelect = document.getElementById('command-select');
             <table id="resultTable" class="table table-dark table-striped table-hover">
                 <thead>
                     <tr>
-                        ${Object.keys(data[0]).map(key => `<th>${key}</th>`).join('')}
+                        ${data.columns.map(column => `<th>${column}</th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>
         `;
 
-        data.forEach(row => {
+        data.data.forEach(row => {
             tableHtml += '<tr>';
-            Object.values(row).forEach(value => {
-                tableHtml += `<td>${value}</td>`;
+            data.columns.forEach(column => {
+                tableHtml += `<td>${row[column]}</td>`;
             });
             tableHtml += '</tr>';
         });

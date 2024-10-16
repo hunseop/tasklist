@@ -41,17 +41,17 @@ async def process_data(
     pw: str = Form(...),
     firewall: str = Form(...),
     command: str = Form(...)
-) -> List[Dict]:
+) -> Dict:
     async with semaphore:
-        try:
-            data = await run_command(ip, id, pw, firewall, command)
-            print(f"Processing data for IP: {ip}, Firewall: {firewall}, Command: {command}")
-            print(f"Result: {data}")
-            return data
-        except Exception as e:
-            print(f"Error occurred: {str(e)}")
-            raise HTTPException(status_code=500, detail=str(e))
-
+        result = await run_command(ip, id, pw, firewall, command)
+        print(f"Processing data for IP: {ip}, Firewall: {firewall}, Command: {command}")
+        print(f"Result: {result}")
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        
+        return result
+    
 @app.get("/get_firewall_types")
 async def get_firewall_types():
     return {"types": get_all_firewall_types()}
