@@ -6,6 +6,8 @@ import random
 from typing import List, Dict
 import os
 import asyncio
+from feature.command import run_command
+from feature.command import get_all_firewall_types, get_commands  # 새로 추가한 import
 
 app = FastAPI()
 
@@ -41,26 +43,23 @@ async def process_data(
     command: str = Form(...)
 ) -> List[Dict]:
     async with semaphore:
-        # 데이터 생성
-        data = []
-        actions = ['Allow', 'Deny']
-        protocols = ['TCP', 'UDP', 'ICMP']
+        try:
+            data = await run_command(ip, id, pw, firewall, command)
+            print(f"Processing data for IP: {ip}, Firewall: {firewall}, Command: {command}")
+            print(f"Result: {data}")
+            return data
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-        for i in range(1, 51):
-            data.append({
-                "rule": i,
-                "source": f"192.168.{random.randint(0, 255)}.{random.randint(0, 255)}",
-                "destination": f"10.0.{random.randint(0, 255)}.{random.randint(0, 255)}",
-                "port": random.randint(0, 65535),
-                "protocol": random.choice(protocols),
-                "action": random.choice(actions)
-            })
+@app.get("/get_firewall_types")
+async def get_firewall_types():
+    return {"types": get_all_firewall_types()}
 
-        # 인위적인 지연 추가 (테스트 목적)
-        await asyncio.sleep(2)
-
-        print(f"Processing data for IP: {ip}, Firewall: {firewall}, Command: {command}")
-        return data
+@app.get("/get_commands/{firewall_type}")
+async def get_firewall_commands(firewall_type: str):
+    commands = get_commands(firewall_type)
+    return {"commands": commands}
 
 @app.get("/semaphore_count")
 async def get_semaphore_count():

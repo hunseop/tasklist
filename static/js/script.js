@@ -1,9 +1,47 @@
 document.addEventListener('DOMContentLoaded', function() {
     const taskList = document.getElementById('task-list');
     const runButton = document.getElementById('run-button');
+    const firewallSelect = document.getElementById('firewall-select');
+const commandSelect = document.getElementById('command-select');
     let runningTasks = 0;
     const maxTasks = 3;
     const taskQueue = [];
+
+    // 방화벽 타입 로드
+    fetch('/get_firewall_types')
+        .then(response => response.json())
+        .then(data => {
+            data.types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                firewallSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+
+    // 방화벽 타입 선택 시 명령어 로드
+    firewallSelect.addEventListener('change', function() {
+        const selectedFirewall = this.value;
+        if (selectedFirewall !== 'Select Firewall Type') {
+            fetch(`/get_commands/${selectedFirewall}`)
+                .then(response => response.json())
+                .then(data => {
+                    commandSelect.innerHTML = '<option selected>Select Command</option>';
+                    data.commands.forEach(command => {
+                        const option = document.createElement('option');
+                        option.value = command;
+                        option.textContent = command;
+                        commandSelect.appendChild(option);
+                    });
+                    commandSelect.disabled = false;
+                })
+                .catch(error => console.error('Error:', error));
+        } else {
+            commandSelect.innerHTML = '<option selected>Select Command</option>';
+            commandSelect.disabled = true;
+        }
+    });
 
     runButton.addEventListener('click', function() {
         const ipInput = document.getElementById('ip-input').value;
