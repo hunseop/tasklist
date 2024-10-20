@@ -2,6 +2,7 @@ import asyncio
 import random
 from typing import List, Dict
 import pandas as pd
+import string
 
 # 각 명령어에 대한 함수 정의
 async def show_system_info():
@@ -41,24 +42,52 @@ async def show_ip_route():
     }
     return pd.DataFrame(data)
 
+async def show_running_rules():
+    num_rows = 100000
+    
+    data = {
+        "vsys": [f"vsys{random.randint(1, 5)}" for _ in range(num_rows)],
+        "seq": list(range(1, num_rows + 1)),
+        "rulename": [f"Rule_{generate_random_string(8)}" for _ in range(num_rows)],
+        "enable": [random.choice(["yes", "no"]) for _ in range(num_rows)],
+        "action": [random.choice(["allow", "deny", "drop"]) for _ in range(num_rows)],
+        "source": [f"10.{random.randint(0, 255)}.{random.randint(0, 255)}.0/24" for _ in range(num_rows)],
+        "user": [f"user_{generate_random_string(6)}" for _ in range(num_rows)],
+        "destination": [f"192.168.{random.randint(0, 255)}.0/24" for _ in range(num_rows)],
+        "service": [random.choice(["any", "http", "https", "ssh", "ftp", "dns"]) for _ in range(num_rows)],
+        "application": [random.choice(["any", "web-browsing", "ssl", "dns", "ftp", "ssh"]) for _ in range(num_rows)],
+        "profile": [f"profile_{generate_random_string(4)}" for _ in range(num_rows)],
+        "description": [f"Description for rule {i+1}" for i in range(num_rows)]
+    }
+    
+    return pd.DataFrame(data)
+
+def generate_random_string(length):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+# FIREWALL_COMMANDS 딕셔너리 수정
 FIREWALL_COMMANDS = {
     "Paloalto": {
         "show system info": show_system_info,
         "show interface all": show_interface_all,
         "show routing route": show_routing_route,
         "show config running": show_config_running,
+        "show running rules": show_running_rules,  # 새로운 명령어 추가
     },
     "MF2": {
         "show version": show_version,
         "show interface": show_interface_all,
         "show ip route": show_ip_route,
         "show running-config": show_config_running,
+        "show running rules": show_running_rules,  # 새로운 명령어 추가
     },
     "NGF": {
         "show system": show_system_info,
         "show interface": show_interface_all,
         "show ip route": show_ip_route,
         "show configuration": show_config_running,
+        "show running rules": show_running_rules,  # 새로운 명령어 추가
     }
 }
 
@@ -98,7 +127,7 @@ async def run_command(host: str, username: str, password: str, firewall_type: st
             "columns": None,
             "message": "Invalid firewall type or command"
         }
-            
+                
 # 테스트를 위한 함수
 async def test_run_command():
     result = await run_command("192.168.1.1", "admin", "password", "Paloalto", "show interface all")

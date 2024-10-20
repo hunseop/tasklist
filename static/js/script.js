@@ -181,55 +181,59 @@ const commandSelect = document.getElementById('command-select');
             return;
         }
 
+        console.log("Data received:", data); // 데이터 로깅
+
+        // 고유한 테이블 ID 생성
+        const tableId = 'resultTable_' + Date.now();
+
         // 스피너 추가 (중앙 정렬)
         resultDiv.innerHTML = '<div class="spinner-container"><div class="spinner mb-3"></div></div>';
 
         let tableHtml = `
-            <table id="resultTable" class="table table-dark table-striped table-hover">
+            <table id="${tableId}" class="table table-dark table-striped table-hover">
                 <thead>
                     <tr>
                         ${data.columns.map(column => `<th>${column}</th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>
+                </tbody>
+            </table>
         `;
 
-        data.data.forEach(row => {
-            tableHtml += '<tr>';
-            data.columns.forEach(column => {
-                tableHtml += `<td>${row[column]}</td>`;
-            });
-            tableHtml += '</tr>';
-        });
-
-        tableHtml += '</tbody></table>';
-        
-        // 테이블 HTML 추가 (스피너 뒤에)
+        // 테이블 HTML 추가
         resultDiv.innerHTML += tableHtml;
 
-        // DataTables 초기화
-        if ($.fn.DataTable.isDataTable('#resultTable')) {
-            $('#resultTable').DataTable().destroy();
-        }
-        $('#resultTable').DataTable({
-            pageLength: 30,
-            lengthMenu: [[30, 50, 100, -1], [30, 50, 100, "All"]],
-            responsive: true,
-            ordering: false,
-            scrollX: true,
-            autoWidth: false,
-            columnDefs: [
-                { 
-                    targets: '_all',
-                    className: 'text-nowrap cell-scrollable',
-                    width: '300px'
-                }
-            ],
-            drawCallback: function() {
-                // DataTables 초기화 완료 후 스피너 제거
-                resultDiv.querySelector('.spinner-container').style.display = 'none';
+        try {
+            // DataTables 초기화
+            if ($.fn.DataTable.isDataTable(`#${tableId}`)) {
+                $(`#${tableId}`).DataTable().destroy();
             }
-        });
+            $(`#${tableId}`).DataTable({
+                data: data.data,
+                columns: data.columns.map(column => ({ title: column, data: column })),
+                pageLength: 30,
+                lengthMenu: [[30, 50, 100, -1], [30, 50, 100, "All"]],
+                responsive: true,
+                ordering: false,
+                scrollX: true,
+                autoWidth: false,
+                columnDefs: [
+                    { 
+                        targets: '_all',
+                        className: 'text-nowrap cell-scrollable',
+                        width: '300px'
+                    }
+                ],
+                drawCallback: function() {
+                    // DataTables 초기화 완료 후 스피너 제거
+                    resultDiv.querySelector('.spinner-container').style.display = 'none';
+                }
+            });
+        } catch (error) {
+            console.error("Error initializing DataTable:", error);
+            resultDiv.innerHTML += '<p class="text-danger">Error initializing table. Please check the console for details.</p>';
+        }
     }
 
     function downloadExcel(data, ip, firewall, command) {

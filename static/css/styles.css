@@ -45,6 +45,8 @@ body {
     padding: 20px;
     background-color: #2c3034;
     border-radius: 5px;
+    width: 100%;
+    overflow-x: auto;
 }
 
 .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate {
@@ -74,12 +76,22 @@ body {
     border-color: #6c757d !important;
 }
 
+table.dataTable {
+    width: 100% !important;
+}
+
 table.dataTable tbody tr {
     background-color: #343a40 !important;
 }
 
 table.dataTable tbody tr:hover {
     background-color: #495057 !important;
+}
+
+table.dataTable th,
+table.dataTable td {
+    white-space: nowrap;
+    max-width: 300px;
 }
 
 /* 스피너 컨테이너 스타일 */
@@ -105,44 +117,11 @@ table.dataTable tbody tr:hover {
     100% { transform: rotate(360deg); }
 }
 
-/* DataTables 스타일 추가 */
-.dataTables_wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-
-table.dataTable {
-    width: 100% !important;
-}
-
-table.dataTable th,
-table.dataTable td {
-    white-space: nowrap;
-    max-width: 300px;
-}
-
 /* 셀 내부 스크롤 스타일 */
 .cell-scrollable {
     max-width: 300px;
     overflow-x: auto;
     white-space: nowrap;
-}
-
-/* 스크롤바 스타일 커스터마이징 */
-.cell-scrollable::-webkit-scrollbar {
-    height: 5px;
-}
-
-.cell-scrollable::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.cell-scrollable::-webkit-scrollbar-thumb {
-    background: #888;
-}
-
-.cell-scrollable::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
 
 /* 카드 스타일 */

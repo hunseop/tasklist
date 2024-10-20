@@ -45,7 +45,6 @@ async def process_data(
     async with semaphore:
         result = await run_command(ip, id, pw, firewall, command)
         print(f"Processing data for IP: {ip}, Firewall: {firewall}, Command: {command}")
-        print(f"Result: {result}")
         
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["message"])
